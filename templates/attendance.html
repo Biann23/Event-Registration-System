@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Attendance check-in · LSPU{% endblock %}
+{% block content %}
+{% set total = registrations|length %}
+{% set checked_in = registrations|selectattr('time_in')|list|length %}
+{% set completed = registrations|selectattr('time_out')|list|length %}
+<section class="page-heading compact-heading">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> EVENT OPERATIONS</p>
+        <h1>Attendance desk<span>.</span></h1>
+        <p class="heading-description">Search by receipt code, student name, or student number, then record time-in and time-out.</p>
+    </div>
+</section>
+
+<section class="roster-summary">
+    <div><span class="summary-label">REGISTRATIONS IN VIEW</span><strong>{{ total }}</strong><p>Matching your search and filters</p></div>
+    <div><span class="summary-label">TIMED IN</span><strong>{{ checked_in }}</strong><p>{{ checked_in - completed }} still on site</p></div>
+    <div><span class="summary-label">COMPLETED</span><strong>{{ completed }}</strong><p>Time-in and time-out recorded</p></div>
+</section>
+
+<section class="section" style="margin-top:28px">
+  <form method="get" class="att-bar" role="search">
+      <label for="q" class="summary-label">FIND A REGISTRATION</label>
+      <div class="search-row">
+          <div class="search-field">{{ ui.ico('search') }}<input id="q" name="q" value="{{ term }}" placeholder="Receipt code, name, or student number" autofocus></div>
+          <select name="event_id" aria-label="Filter by event" style="flex:0 1 280px">
+              <option value="">All accessible events</option>
+              {% for e in events %}
+              <option value="{{ e.id }}" {% if selected_event == e.id %}selected{% endif %}>{{ e.title }}</option>
+              {% endfor %}
+          </select>
+          <button class="btn btn-primary" type="submit">Search</button>
+          {% if term or selected_event %}<a class="btn btn-light" href="{{ url_for('attendance_dashboard') }}">Clear</a>{% endif %}
+      </div>
+  </form>
+  <div class="tablebox">
+    <table class="t-stack">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Event</th>
+                <th>Receipt code</th>
+                <th>Time in</th>
+                <th>Time out</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for section, students in registrations|groupby('student.section') %}
+            <tr class="group-row">
+                <td colspan="6">Section {{ section or 'Unassigned' }}<span>{{ students|length }} registration{{ '' if students|length == 1 else 's' }}</span></td>
+            </tr>
+            {% for r in students %}
+            <tr>
+                <td data-label="Student"><strong>{{ r.student.name }}</strong><small>{{ r.student.student_number or r.student.email }}</small></td>
+                <td data-label="Event">{{ r.event.title }}<small>{{ ui.d(r.event.event_date) }}</small></td>
+                <td data-label="Receipt" class="mono-cell">{{ r.receipt_code }}</td>
+                <td data-label="Time in">{% if r.time_in %}<span class="att-state in">{{ ui.ico('in') }}{{ ui.dt(r.time_in) }}</span>{% else %}<span class="att-state none">Not recorded</span>{% endif %}</td>
+                <td data-label="Time out">{% if r.time_out %}<span class="att-state done">{{ ui.ico('check') }}{{ ui.dt(r.time_out) }}</span>{% else %}<span class="att-state none">Not recorded</span>{% endif %}</td>
+                <td data-label="Action">
+                    {% if is_admin %}
+                        {% if not r.time_in %}
+                        <form method="post" action="{{ url_for('attendance', rid=r.id, action='time-in') }}" style="display: flex; gap: 8px; align-items: center;">
+                            {{ ui.csrf() }}
+                            <input type="time" name="manual_time" style="min-height: 34px; padding: 4px 8px; width: 110px;">
+                            <button class="btn btn-primary btn-sm" type="submit">Time in</button>
+                        </form>
+                        {% elif not r.time_out %}
+                        <form method="post" action="{{ url_for('attendance', rid=r.id, action='time-out') }}" style="display: flex; gap: 8px; align-items: center;">
+                            {{ ui.csrf() }}
+                            <input type="time" name="manual_time" style="min-height: 34px; padding: 4px 8px; width: 110px;">
+                            <button class="btn btn-gold btn-sm" type="submit">Time out</button>
+                        </form>
+                        {% else %}
+                        <span class="pill pill-ok">Complete</span>
+                        {% endif %}
+                    {% else %}
+                        {% if r.time_out %}
+                        <span class="pill pill-ok">Complete</span>
+                        {% elif r.time_in %}
+                        <span class="pill pill-gold">On site</span>
+                        {% else %}
+                        <span class="pill pill-ended">Not checked in</span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr><td colspan="6" class="no-label"><div class="table-empty"><strong>No matching registrations.</strong><span>Try another search or event.</span></div></td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

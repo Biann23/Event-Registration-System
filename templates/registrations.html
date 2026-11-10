@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Event registrations · LSPU{% endblock %}
+{% block content %}
+{% set checked = registrations|selectattr('time_in')|list|length %}
+<a class="crumb" href="{{ url_for('admin_home') }}">{{ ui.ico('arrow-l') }} Back to dashboard</a>
+<section class="page-heading compact-heading" style="padding-top:26px">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> ADMIN WORKSPACE / REGISTRATIONS</p>
+        <h1>Event roster<span>.</span></h1>
+        <p class="heading-description">{{ event.title }} · {{ registrations|length }} matching registration{{ '' if registrations|length == 1 else 's' }}.</p>
+    </div>
+    <div class="heading-actions">
+        <a class="btn btn-light" href="{{ url_for('attendance_dashboard', event_id=event.id) }}">{{ ui.ico('in') }} Attendance check-in</a>
+    </div>
+</section>
+
+<section class="roster-summary">
+    <div><span class="summary-label">REGISTERED</span><strong>{{ registrations|length }}</strong><p>of {{ event.capacity }} seats</p></div>
+    <div><span class="summary-label">CHECKED IN</span><strong>{{ checked }}</strong><p>Among the records in view</p></div>
+    <div><span class="summary-label">STATUS</span><div style="margin-top:12px">{{ ui.pill(event) }}</div><p style="margin-top:8px">{{ ui.d(event.event_date) }}</p></div>
+</section>
+
+<section class="section" style="margin-top:28px">
+  <form method="get" class="search-form" style="margin-bottom:18px"><label class="sr-only" for="q">Search registrations</label><div class="search-row"><div class="search-field">{{ ui.ico('search') }}<input id="q" name="q" value="{{ term }}" placeholder="Name, student number, or receipt code"></div><button class="btn btn-primary" type="submit">Search</button>{% if term %}<a class="btn btn-light" href="{{ url_for('event_registrations', eid=event.id) }}">Clear</a>{% endif %}</div></form>
+  <div class="tablebox"><table class="t-stack"><thead><tr><th>Receipt code</th><th>Student</th><th>Student number</th><th>Section</th><th>Registered</th><th>Attendance</th></tr></thead><tbody>
+  {% for r in registrations %}<tr>
+    <td data-label="Receipt" class="mono-cell">{{ r.receipt_code }}</td>
+    <td data-label="Student"><strong>{{ r.student.name }}</strong><small>{{ r.student.email }}</small></td>
+    <td data-label="Student no." class="tnum">{{ r.student.student_number or '—' }}</td>
+    <td data-label="Section">{% if r.student.section %}<span class="table-tag">{{ r.student.section }}</span>{% else %}—{% endif %}</td>
+    <td data-label="Registered" class="date-cell">{{ ui.dt(r.created_at) }}</td>
+    <td data-label="Attendance">{% if r.time_in %}<span class="pill pill-ok">Checked in</span>{% else %}<span class="pill pill-ended">Not checked in</span>{% endif %}</td>
+  </tr>
+  {% else %}<tr><td colspan="6" class="no-label"><div class="table-empty"><strong>No registrations found.</strong><span>Try a different search or wait for students to register.</span></div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

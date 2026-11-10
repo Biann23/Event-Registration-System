@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}{{ event.title }} · LSPU Events{% endblock %}
+{% block content %}
+{% set confirmed = event.confirmed_count %}
+{% set left = event.capacity - confirmed %}
+<a class="crumb" href="{{ url_for('student_home') }}">{{ ui.ico('arrow-l') }} Back to events</a>
+
+<section class="detail-hero">
+  {{ ui.media(event, 'Photo for ' ~ event.title) }}
+  <div class="detail-hero-copy">
+    <div class="meta-row">{{ ui.pill(event) }}<span class="pill pill-plain">{{ event.program }}</span></div>
+    <h1>{{ event.title }}</h1>
+  </div>
+</section>
+
+<section class="detail-layout" style="display: grid; grid-template-columns: 1fr; gap: 40px; margin-top: 44px;">
+  <div class="detail-main">
+    <p class="section-overline">ABOUT THIS EVENT</p>
+    <p class="detail-description">{{ event.description or 'Join the LSPU community for this campus event.' }}</p>
+    
+    <div class="detail-facts" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 20px 0;">
+      <div style="display: flex; gap: 14px;">
+        <div style="color: var(--blue);">{{ ui.ico('calendar') }}</div>
+        <div><span class="detail-fact-label">DATE</span><strong>{{ ui.d(event.event_date) }}</strong></div>
+      </div>
+      <div style="display: flex; gap: 14px;">
+        <div style="color: var(--blue);">{{ ui.ico('clock') }}</div>
+        <div><span class="detail-fact-label">TIME</span><strong>{{ ui.t(event.start_time) }} to {{ ui.t(event.end_time) }}</strong></div>
+      </div>
+      <div style="display: flex; gap: 14px;">
+        <div style="color: var(--blue);">{{ ui.ico('pin') }}</div>
+        <div><span class="detail-fact-label">VENUE</span><strong>{{ event.venue }}</strong></div>
+      </div>
+      <div style="display: flex; gap: 14px;">
+        <div style="color: var(--blue);">{{ ui.ico('users') }}</div>
+        <div><span class="detail-fact-label">CAPACITY</span><strong>{{ event.confirmed_count }} / {{ event.capacity }} confirmed</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reserve" aria-labelledby="reserve-h" style="margin: 0 auto; width: 100%; max-width: 800px; border-top: 3px solid var(--gold); padding: 40px;">
+    {% if event.status == 'Lunch Break' %}
+        <h2>Lunch Break</h2>
+        <p class="reserve-lede">Registration is temporarily closed during the lunch break.</p>
+        <div class="status-note wait" style="background: var(--warn-soft); color: #7a5b1b; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: bold;">
+            {{ ui.ico('clock') }} Registration will resume after the break
+        </div>
+
+    {% elif event.status in ['Ended', 'Archived'] %}
+        <h2>Event has ended</h2>
+        <p class="reserve-lede">This event is no longer accepting registrations.</p>
+        <div class="status-note closed" style="background: var(--paper-deep); color: var(--ink-soft); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: bold;">
+            {{ ui.ico('lock') }} Registration closed
+        </div>
+        {% if registration %}
+            <div style="margin-top: 20px;">
+                <a class="btn btn-light btn-block" href="{{ url_for('receipt', rid=registration.id) }}">View your receipt {{ ui.ico('arrow-ur', 'ico-go') }}</a>
+            </div>
+        {% endif %}
+
+    {% else %}
+        <h2 id="reserve-h">Reserve your seat</h2>
+        <p class="reserve-lede">{% if registration %}Your place is secured.{% elif waiting %}You're in the queue for a seat.{% elif left <= 0 %}This event is full. Join the waiting list.{% else %}Confirm your details to register.{% endif %}</p>
+        
+        <div class="seats" style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px;">
+          <b style="font: 800 52px/1 var(--font-display); letter-spacing: -.07em; color: var(--navy);">{{ [left, 0]|max }}</b>
+          <span style="color: var(--muted); font-size: 13px;">seats left of {{ event.capacity }}</span>
+        </div>
+        
+        {{ ui.meter(confirmed, event.capacity) }}
+        <div class="meter-row" style="display: flex; justify-content: space-between; margin: 10px 0 20px; font-size: 12px; color: var(--muted);">
+            <span>{{ confirmed }} confirmed</span>
+            <span>{{ event.waiting_count }} waiting</span>
+        </div>
+
+        {% if registration %}
+          <div class="status-note" style="background: var(--success-soft); color: var(--success); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: bold;">{{ ui.ico('check') }} You're registered for this event.</div>
+          <div class="form-stack">
+            <a class="btn btn-primary" href="{{ url_for('receipt', rid=registration.id) }}">View registration receipt {{ ui.ico('arrow-ur', 'ico-go') }}</a>
+            {% if not registration.time_in and not registration.time_out %}
+            <form method="post" action="{{ url_for('cancel_registration', rid=registration.id) }}" data-confirm="Cancel your registration? If someone is waiting, the next student may be promoted." data-confirm-title="Cancel registration?" data-confirm-ok="Cancel registration">{{ ui.csrf() }}<button class="btn btn-light" type="submit">Cancel registration</button></form>
+            {% endif %}
+          </div>
+        {% elif waiting %}
+          <div class="status-note wait" style="background: var(--warn-soft); color: #7a5b1b; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 10px; font-weight: bold;">{{ ui.ico('clock') }} You're on the waiting list</div>
+          <form method="post" action="{{ url_for('cancel_waitlist', wid=waiting.id) }}" data-confirm="Leave this event waiting list?" data-confirm-title="Leave waiting list?" data-confirm-ok="Leave list">{{ ui.csrf() }}<button class="btn btn-light btn-block" type="submit">Leave waiting list</button></form>
+        {% else %}
+          <form method="post" action="{{ url_for('register', eid=event.id) }}" class="form-stack" data-lock>
+            {{ ui.csrf() }}
+            <p class="form-section-note" style="font-size: 11px; font-weight: 800; letter-spacing: 0.14em; color: var(--muted); margin-bottom: -10px;">CONFIRM YOUR DETAILS</p>
+            <label>Full name<input name="full_name" required maxlength="120" value="{{ current_user.name }}"></label>
+            <label>Student number<input name="student_number" required maxlength="40" value="{{ current_user.student_number or '' }}"></label>
+            
+            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <label>Year level
+                  <select name="year_level" required>
+                      {% for y in ['First Year','Second Year','Third Year','Fourth Year'] %}
+                      <option {% if current_user.year_level == y %}selected{% endif %}>{{ y }}</option>
+                      {% endfor %}
+                  </select>
+              </label>
+              
+              <label>Section
+                  <select name="section" required>
+                      <option value="" disabled selected>Select Section</option>
+                      <optgroup label="BSCS">
+                          <option value="BSCS 1A" {% if current_user.section == 'BSCS 1A' %}selected{% endif %}>BSCS 1A</option>
+                          <option value="BSCS 1B" {% if current_user.section == 'BSCS 1B' %}selected{% endif %}>BSCS 1B</option>
+                          <option value="BSCS 2A" {% if current_user.section == 'BSCS 2A' %}selected{% endif %}>BSCS 2A</option>
+                          <option value="BSCS 2B" {% if current_user.section == 'BSCS 2B' %}selected{% endif %}>BSCS 2B</option>
+                          <option value="BSCS 3A" {% if current_user.section == 'BSCS 3A' %}selected{% endif %}>BSCS 3A</option>
+                          <option value="BSCS 3B" {% if current_user.section == 'BSCS 3B' %}selected{% endif %}>BSCS 3B</option>
+                          <option value="BSCS 4A" {% if current_user.section == 'BSCS 4A' %}selected{% endif %}>BSCS 4A</option>
+                          <option value="BSCS 4B" {% if current_user.section == 'BSCS 4B' %}selected{% endif %}>BSCS 4B</option>
+                      </optgroup>
+                      <optgroup label="BSIT">
+                          <option value="BSIT 1A" {% if current_user.section == 'BSIT 1A' %}selected{% endif %}>BSIT 1A</option>
+                          <option value="BSIT 1B" {% if current_user.section == 'BSIT 1B' %}selected{% endif %}>BSIT 1B</option>
+                          <option value="BSIT 2A" {% if current_user.section == 'BSIT 2A' %}selected{% endif %}>BSIT 2A</option>
+                          <option value="BSIT 2B" {% if current_user.section == 'BSIT 2B' %}selected{% endif %}>BSIT 2B</option>
+                          <option value="BSIT 3A" {% if current_user.section == 'BSIT 3A' %}selected{% endif %}>BSIT 3A</option>
+                          <option value="BSIT 3B" {% if current_user.section == 'BSIT 3B' %}selected{% endif %}>BSIT 3B</option>
+                          <option value="BSIT 3C" {% if current_user.section == 'BSIT 3C' %}selected{% endif %}>BSIT 3C</option>
+                          <option value="BSIT 3D" {% if current_user.section == 'BSIT 3D' %}selected{% endif %}>BSIT 3D</option>
+                          <option value="BSIT 4A" {% if current_user.section == 'BSIT 4A' %}selected{% endif %}>BSIT 4A</option>
+                          <option value="BSIT 4B" {% if current_user.section == 'BSIT 4B' %}selected{% endif %}>BSIT 4B</option>
+                          <option value="BSIT 4C" {% if current_user.section == 'BSIT 4C' %}selected{% endif %}>BSIT 4C</option>
+                          <option value="BSIT 4D" {% if current_user.section == 'BSIT 4D' %}selected{% endif %}>BSIT 4D</option>
+                      </optgroup>
+                  </select>
+              </label>
+            </div>
+            
+            <label>Program<select name="program" required>{% for p in ['BSCS','BSIT'] %}<option {% if current_user.program == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></label>
+            <button class="btn btn-primary" type="submit" data-busy="{{ 'Joining' if left <= 0 else 'Registering' }}">{{ 'Join the waiting list' if left <= 0 else 'Register for event' }} {{ ui.ico('arrow-r') }}</button>
+          </form>
+        {% endif %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Registration receipt · LSPU{% endblock %}
+{% block content %}
+{% set r = registration %}
+<section class="receipt-shell">
+  <div class="receipt-brandline">
+      <span class="receipt-seal"><img src="{{ url_for('static', filename='lspu-logo.png') }}" alt=""></span>
+      <span><strong>LAGUNA STATE POLYTECHNIC UNIVERSITY</strong><small>EVENT MANAGEMENT SYSTEM</small></span>
+      <span class="receipt-stamp">OFFICIAL<br>RECEIPT</span>
+  </div>
+  <div class="receipt-success">
+      <span class="receipt-check">{{ ui.ico('check') }}</span>
+      <div>
+          <p class="section-overline">REGISTRATION CONFIRMED</p>
+          <h1>You're on the list<span>.</span></h1>
+          <p>Keep this confirmation for your event records.</p>
+      </div>
+  </div>
+  <div class="receipt-code-row">
+      <span><small>REGISTRATION REFERENCE</small><strong>{{ r.receipt_code }}</strong></span>
+      <span class="receipt-status">CONFIRMED</span>
+  </div>
+  <div class="perf" aria-hidden="true"></div>
+  <div class="receipt-details">
+      <div>
+          <small>REGISTERED STUDENT</small>
+          <strong>{{ r.student.name }}</strong>
+          <span>{{ r.student.student_number }}</span>
+      </div>
+      <div>
+          <small>SECTION & PROGRAM</small>
+          <strong>{{ r.student.section }}</strong>
+          <span>{{ r.student.program }}</span>
+      </div>
+      <div>
+          <small>EVENT</small>
+          <strong>{{ r.event.title }}</strong>
+          <span>{{ r.event.program }}</span>
+      </div>
+      <div>
+          <small>EVENT DATE & VENUE</small>
+          <strong>{{ ui.d(r.event.event_date) }}</strong>
+          <span>{{ r.event.venue }}</span>
+      </div>
+  </div>
+  <div class="receipt-bottom">
+      <p>Present this receipt to the event organizers for registration verification.</p>
+      <button class="btn btn-primary no-print" onclick="window.print()" type="button">{{ ui.ico('printer') }} Print receipt</button>
+  </div>
+</section>
+<div class="receipt-links no-print"><a class="btn btn-light" href="{{ url_for('event_detail', eid=r.event_id) }}">Back to event</a><a class="btn btn-light" href="{{ url_for('student_home') }}">All events</a></div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Registered students · LSPU{% endblock %}
+{% block content %}
+<a class="crumb" href="{{ url_for('professor_events') }}">{{ ui.ico('arrow-l') }} Back to events</a>
+<section class="page-heading compact-heading" style="padding-top:26px">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> FACULTY WORKSPACE / EVENT</p>
+        <h1>Registered students<span>.</span></h1>
+        <p class="heading-description">{{ event.title }} · {{ registrations|length }} registration{{ '' if registrations|length == 1 else 's' }} in your sections.</p>
+    </div>
+    <div class="heading-actions">
+        <a class="btn btn-light" href="{{ url_for('attendance_dashboard', event_id=event.id) }}">{{ ui.ico('in') }} Attendance desk</a>
+    </div>
+</section>
+
+<section class="section" style="margin-top:28px">
+  <form method="get" class="search-form" style="margin-bottom:18px">
+    <label class="sr-only" for="q">Search registrations</label>
+    <div class="search-row">
+      <div class="search-field">{{ ui.ico('search') }}<input id="q" name="q" value="{{ term }}" placeholder="Name, section, or receipt code"></div>
+      <button class="btn btn-primary" type="submit">Search</button>
+      {% if term %}<a class="btn btn-light" href="{{ url_for('professor_event_registrations', eid=event.id) }}">Clear</a>{% endif %}
+    </div>
+  </form>
+  <div class="tablebox">
+    <table class="t-stack">
+      <thead><tr><th>Full name</th><th>Section</th><th>Time in</th><th>Time out</th><th>Receipt code</th></tr></thead>
+      <tbody>
+      {% for r in registrations %}
+      <tr>
+        <td data-label="Full name"><strong>{{ r.student.name }}</strong></td>
+        <td data-label="Section"><span class="table-tag">{{ r.student.section or '—' }}</span></td>
+        <td data-label="Time in">{% if r.time_in %}<span class="att-state in">{{ ui.ico('in') }}{{ ui.dt(r.time_in) }}</span>{% else %}<span class="att-state none">Not recorded</span>{% endif %}</td>
+        <td data-label="Time out">{% if r.time_out %}<span class="att-state done">{{ ui.ico('check') }}{{ ui.dt(r.time_out) }}</span>{% else %}<span class="att-state none">Not recorded</span>{% endif %}</td>
+        <td data-label="Receipt" class="mono-cell">{{ r.receipt_code }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="no-label"><div class="table-empty"><strong>No registered students found.</strong><span>Students from your sections who register will appear here.</span></div></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

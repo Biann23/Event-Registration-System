@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}{{ item.title }} · LSPU Campus Bulletin{% endblock %}
+{% block content %}
+<section class="story-page">
+  <a class="story-back" href="{{ url_for('landing') }}">{{ ui.ico('arrow-l') }} Back to homepage</a>
+
+  <article class="story-article">
+    <header class="story-header">
+      <div class="story-publication-line">
+        <p class="eyebrow"><span class="eyebrow-line"></span> LSPU CAMPUS BULLETIN</p>
+        <span class="story-issue">CAMPUS LIFE / NEWS</span>
+      </div>
+      <p class="story-date">{{ item.created_at.strftime('%A, %B %d, %Y') }}</p>
+      <h1>{{ item.title }}</h1>
+      {% if item.summary %}<p class="story-summary">{{ item.summary }}</p>{% endif %}
+      <div class="story-byline"><span class="story-byline-mark">L</span><span><strong>Laguna State Polytechnic University</strong><small>Campus community update</small></span><span class="story-byline-spacer"></span><span class="story-byline-label">OFFICIAL BULLETIN</span></div>
+    </header>
+
+    {% if item.video_filename or item.image_filename %}
+    <figure class="story-cover-wrap">
+      {% if item.video_filename %}<video class="story-cover story-cover-video" controls playsinline preload="metadata" {% if item.image_filename %}poster="{{ url_for('static', filename='uploads/' ~ item.image_filename) }}"{% endif %}><source src="{{ url_for('static', filename='uploads/' ~ item.video_filename) }}">Your browser does not support the video element.</video>
+      {% else %}<img class="story-cover" src="{{ url_for('static', filename='uploads/' ~ item.image_filename) }}" alt="{{ item.title }}">{% endif %}
+      <figcaption><span>{% if item.video_filename %}FEATURED CAMPUS VIDEO{% else %}FROM THE LSPU COMMUNITY{% endif %}</span><span>{{ item.created_at.strftime('%b %d, %Y') }}</span></figcaption>
+    </figure>
+    {% endif %}
+
+    <div class="story-content-layout">
+      <div class="story-main-column">
+        <div class="story-body-label"><span class="story-body-label-dot"></span> THE STORY</div>
+        <div class="story-body">{{ item.body }}</div>
+      </div>
+      <aside class="story-side-rail" aria-label="Story information">
+        <div class="story-info-card">
+          <span class="story-side-kicker">IN THIS STORY</span>
+          <div class="story-info-row"><span class="story-info-icon">{{ ui.ico('calendar') }}</span><span><small>Published</small><strong>{{ item.created_at.strftime('%B %d, %Y') }}</strong></span></div>
+          <div class="story-info-row"><span class="story-info-icon">{{ ui.ico('image') }}</span><span><small>Media collection</small><strong>{{ item.photos|length }} photos · {{ item.videos|length }} videos</strong></span></div>
+          <div class="story-info-divider"></div>
+          <p>Stories, updates, and moments that bring the LSPU community together.</p>
+        </div>
+        <a class="story-back-card" href="{{ url_for('landing') }}"><span>{{ ui.ico('arrow-l') }}</span><span><small>FINISHED READING?</small><strong>Return to homepage</strong></span></a>
+      </aside>
+    </div>
+
+    {% if media_total %}
+    <section class="story-gallery">
+      <div class="story-gallery-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> MOMENTS FROM CAMPUS</p><h2>More than a headline<span>.</span></h2><p class="story-gallery-intro">A closer look at the people, places, and moments behind this story.</p></div><span class="story-gallery-count">{{ media_total }} MEDIA ITEMS</span></div>
+      <div class="story-photo-grid">{% for media in gallery_media %}<figure>{% if media.kind == 'video' %}<video controls playsinline preload="metadata"><source src="{{ url_for('static', filename='uploads/' ~ media.filename) }}">Your browser does not support this video.</video>{% else %}<img src="{{ url_for('static', filename='uploads/' ~ media.filename) }}" alt="{{ media.caption or item.title }}">{% endif %}{% if media.caption %}<figcaption>{{ media.caption }}</figcaption>{% else %}<figcaption>{{ 'Campus video' if media.kind == 'video' else 'A moment from campus' }}</figcaption>{% endif %}</figure>{% endfor %}</div>
+      {% if media_pages > 1 %}<nav class="story-gallery-pagination" aria-label="Gallery pages">{% if media_page > 1 %}<a href="{{ url_for('announcement_detail', item_id=item.id, media_page=media_page-1) }}">← Previous</a>{% endif %}<span>Page {{ media_page }} of {{ media_pages }}</span>{% if media_page < media_pages %}<a href="{{ url_for('announcement_detail', item_id=item.id, media_page=media_page+1) }}">Next →</a>{% endif %}</nav>{% endif %}
+    </section>
+    {% endif %}
+    <footer class="story-footer"><span class="story-footer-seal">L</span><span><strong>Laguna State Polytechnic University</strong><small>Your campus. Your community. Your next experience.</small></span><a href="{{ url_for('landing') }}">Explore campus {{ ui.ico('arrow-ur') }}</a></footer>
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}{{ 'Edit event' if event else 'Create event' }} · LSPU{% endblock %}
+{% block content %}
+<a class="crumb" href="{{ url_for('admin_home') }}">{{ ui.ico('arrow-l') }} Back to dashboard</a>
+<section class="page-heading compact-heading" style="padding-top:26px"><div><p class="eyebrow"><span class="eyebrow-line"></span> EVENT MANAGEMENT</p><h1>{{ 'Edit event' if event else 'Create an event' }}<span>.</span></h1><p class="heading-description">Set the details, schedule, and capacity for a campus event.</p></div><span class="aside-index">ADMIN WORKSPACE / EVENTS</span></section>
+<form class="mform" method="post" enctype="multipart/form-data" data-lock>{{ ui.csrf() }}
+  <div class="fsec">
+    <div class="fsec-head"><span class="fnum">01</span><h2>Event information</h2><p>The title, audience and description students see on the event board.</p></div>
+    <div class="fields">
+      <label class="full">Event title<input name="title" required value="{{ event.title if event else '' }}" placeholder="e.g. CCS Student Assembly"></label>
+      <label>Program<select name="program">{% for p in ['BSCS','BSIT','CCS','All Programs'] %}<option {% if event and event.program==p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></label>
+      <label>Venue<input name="venue" required value="{{ event.venue if event else '' }}" placeholder="Building, room, or campus location"></label>
+      <label class="full">Description<textarea name="description" rows="4" placeholder="What should participants know about this event?">{{ event.description if event else '' }}</textarea></label>
+    </div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-head"><span class="fnum">02</span><h2>Event photo</h2><p>Add an optional photo that appears with this event in the event listings.</p></div>
+    <div class="fields">
+      {% if event and event.image_filename %}<div class="full current-photo"><img src="{{ url_for('static', filename='uploads/' ~ event.image_filename) }}" alt="Current photo for {{ event.title }}"><div><strong style="font-size:13px">Current photo</strong><br><small>{{ event.image_filename }}</small></div></div>{% endif %}
+      <label class="full">Event photo <span class="label-optional">OPTIONAL · JPG, PNG, WEBP · MAX 5 MB</span><input type="file" name="event_image" accept="image/jpeg,image/png,image/webp"></label>
+    </div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-head"><span class="fnum">03</span><h2>Schedule and capacity</h2><p>Times drive the event status: not started, ongoing, lunch break, and ended.</p></div>
+    <div class="fields">
+      <label>Date<input type="date" name="event_date" required value="{{ event.event_date.isoformat() if event else '' }}"></label>
+      <label>Maximum capacity<input type="number" min="1" name="capacity" required value="{{ event.capacity if event else 100 }}"></label>
+      <label>Start time<input type="time" name="start_time" required value="{{ event.start_time.strftime('%H:%M') if event else '08:00' }}"></label>
+      <label>End time<input type="time" name="end_time" required value="{{ event.end_time.strftime('%H:%M') if event else '17:00' }}"></label>
+      <label>Lunch break starts <span class="label-optional">OPTIONAL</span><input type="time" name="lunch_start" value="{{ event.lunch_start.strftime('%H:%M') if event and event.lunch_start else '' }}"></label>
+      <label>Lunch break ends <span class="label-optional">OPTIONAL</span><input type="time" name="lunch_end" value="{{ event.lunch_end.strftime('%H:%M') if event and event.lunch_end else '' }}"></label>
+    </div>
+  </div>
+  <div class="fbar"><button class="btn btn-primary" type="submit" data-busy="Saving">Save event {{ ui.ico('arrow-r') }}</button><a class="btn btn-light" href="{{ url_for('admin_home') }}">Cancel</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}System Logs · LSPU{% endblock %}
+
+{% block content %}
+<section class="page-heading compact-heading">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> ADMIN WORKSPACE</p>
+        <h1>System Logs &amp; Alerts<span>.</span></h1>
+        <p class="heading-description">Real-time terminal view of system activity and security warnings.</p>
+    </div>
+</section>
+
+<div style="background: #0F1117; border-radius: 8px; border: 1px solid #1F2937; padding: 20px; margin-top: 20px; font-family: 'Courier New', Courier, monospace; color: #E5E7EB; overflow-x: auto;">
+    <div style="display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 10px;">
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #EF4444;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #F59E0B;"></div>
+        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10B981;"></div>
+        <span style="margin-left: 10px; color: #6B7280; font-size: 12px;">root@lspu-system:~# tail -f /var/log/activity.log</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; line-height: 1.5;">
+        {% for l in logs %}
+            <div style="display: flex; gap: 15px;">
+                <span style="color: #6B7280; min-width: 140px;">[{{ l.created_at.strftime('%Y-%m-%d %H:%M:%S') }}]</span>
+                {% if l.level == 'ERROR' %}
+                    <span style="color: #EF4444; min-width: 70px;">[ERROR]</span>
+                {% elif l.level == 'WARNING' %}
+                    <span style="color: #F59E0B; min-width: 70px;">[WARN]</span>
+                {% else %}
+                    <span style="color: #10B981; min-width: 70px;">[INFO]</span>
+                {% endif %}
+                <span style="color: #60A5FA; min-width: 150px;">{{ l.action }}</span>
+                <span style="color: #E5E7EB; flex: 1;">{{ l.details }}</span>
+                <span style="color: #9CA3AF;">({{ l.actor }})</span>
+            </div>
+        {% else %}
+            <div style="color: #6B7280;">No logs recorded yet.</div>
+        {% endfor %}
+        
+        <div style="margin-top: 10px; display: flex; align-items: center;">
+            <span style="color: #10B981;">root@lspu-system:~#</span>
+            <span style="width: 8px; height: 16px; background: #E5E7EB; margin-left: 10px; animation: blink 1s step-end infinite;"></span>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes blink {
+        50% { opacity: 0; }
+    }
+</style>
+{% endblock %}

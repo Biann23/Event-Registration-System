@@ -1,0 +1,64 @@
+{# Shared UI helpers: icons, formatting, status pills, event artwork, CSRF field. #}
+
+{% macro ico(name, cls='') -%}
+<svg class="ico {{ cls }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+{%- if name == 'calendar' %}<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>
+{%- elif name == 'pin' %}<path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>
+{%- elif name == 'clock' %}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+{%- elif name == 'users' %}<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .7 3.2 2.4 3.5 5.2"/>
+{%- elif name == 'search' %}<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+{%- elif name == 'check' %}<path d="m5 12.5 4.5 4.5L19 7.5"/>
+{%- elif name == 'plus' %}<path d="M12 5v14M5 12h14"/>
+{%- elif name == 'arrow-ur' %}<path d="M7 17 17 7M8 7h9v9"/>
+{%- elif name == 'arrow-r' %}<path d="M5 12h14m-5-5 5 5-5 5"/>
+{%- elif name == 'arrow-l' %}<path d="M19 12H5m5-5-5 5 5 5"/>
+{%- elif name == 'chev' %}<path d="m6 9 6 6 6-6"/>
+{%- elif name == 'dots' %}<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>
+{%- elif name == 'download' %}<path d="M12 4v11m0 0 4-4m-4 4-4-4M5 20h14"/>
+{%- elif name == 'printer' %}<path d="M7 9V3h10v6M7 17H4v-7h16v7h-3"/><rect x="7" y="14" width="10" height="7" rx="1"/>
+{%- elif name == 'lock' %}<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+{%- elif name == 'logout' %}<path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/>
+{%- elif name == 'shield' %}<path d="M12 3 4.5 6v6c0 4.4 3.2 7.4 7.5 9 4.3-1.6 7.5-4.6 7.5-9V6L12 3z"/><path d="m9 12 2.2 2.2L15.5 10"/>
+{%- elif name == 'cap' %}<path d="m2 9 10-5 10 5-10 5L2 9z"/><path d="M6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5"/>
+{%- elif name == 'board' %}<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>
+{%- elif name == 'list' %}<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+{%- elif name == 'edit' %}<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/>
+{%- elif name == 'wallet' %}<path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 14h2"/>
+{%- elif name == 'pin2' %}<path d="M9 4h6l-1 6 3 3v2H7v-2l3-3-1-6zM12 15v6"/>
+{%- elif name == 'archive' %}<rect x="3" y="4" width="18" height="4" rx="1"/><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4"/>
+{%- elif name == 'trash' %}<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>
+{%- elif name == 'alert' %}<path d="M12 4 2.5 20h19L12 4z"/><path d="M12 10v4M12 17.5v.01"/>
+{%- elif name == 'in' %}<path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5M10 8l4 4-4 4M14 12H4"/>
+{%- elif name == 'spark' %}<path d="M12 2v7M12 15v7M2 12h7M15 12h7M5 5l4 4M15 15l4 4M19 5l-4 4M9 15l-4 4"/>
+{%- elif name == 'settings' %}<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+{%- elif name == 'info' %}<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro csrf() -%}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{%- endmacro %}
+
+{# ---- formatting (Windows-safe: no %-d or %-I) ---- #}
+{% macro d(v) -%}{{ v.strftime('%a, %b') }} {{ v.day }}, {{ v.year }}{%- endmacro %}
+{% macro dlong(v) -%}{{ v.strftime('%B') }} {{ v.day }}, {{ v.year }}{%- endmacro %}
+{% macro t(v) -%}{{ v.strftime('%I:%M %p').lstrip('0') }}{%- endmacro %}
+{% macro dt(v) -%}{{ v.strftime('%b') }} {{ v.day }}, {{ v.strftime('%I:%M %p').lstrip('0') }}{%- endmacro %}
+{% macro peso(v) -%}₱{{ "{:,.2f}".format(v) }}{%- endmacro %}
+
+{% macro pill(event, on_media=False) -%}
+{%- set s = event.status -%}
+<span class="pill pill-{{ s | lower | replace(' ', '-') }}{{ ' on-media' if on_media }}">{{ 'Lunch break' if s == 'Lunch Break' else s }}</span>
+{%- endmacro %}
+
+{# Photo when one was uploaded, otherwise generated artwork. #}
+{% macro media(e, alt='') -%}
+{%- if e.image_filename -%}<img src="{{ url_for('static', filename='uploads/' ~ e.image_filename) }}" alt="{{ alt }}" loading="lazy">
+{%- else -%}<div class="art art-{{ e.id % 4 }}" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2v7M12 15v7M2 12h7M15 12h7M5 5l4 4M15 15l4 4M19 5l-4 4M9 15l-4 4"/></svg></div>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro meter(confirmed, capacity) -%}
+{%- set left = capacity - confirmed -%}
+{%- set pct = [100, (confirmed * 100 // capacity)] | min -%}
+<div class="meter {{ 'is-full' if left <= 0 else ('is-low' if left * 100 <= capacity * 15 else '') }}" role="img" aria-label="{{ confirmed }} of {{ capacity }} seats taken"><span style="width:{{ pct }}%"></span></div>
+{%- endmacro %}

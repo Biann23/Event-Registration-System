@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Settings · LSPU{% endblock %}
+
+{% block content %}
+<section class="page-heading compact-heading">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> ACCOUNT WORKSPACE</p>
+        <h1>Settings<span>.</span></h1>
+        <p class="heading-description">Manage your account information, security, and preferences.</p>
+    </div>
+</section>
+
+<div class="settings-layout" style="display: grid; grid-template-columns: 250px 1fr; gap: 40px; margin-top: 30px;">
+    
+    <!-- SIDEBAR TABS -->
+    <aside style="border-right: 1px solid var(--line); padding-right: 20px;">
+        <nav style="display: flex; flex-direction: column; gap: 5px;">
+            <button type="button" class="settings-tab-btn active" onclick="openTab('profile')" style="text-align: left; padding: 10px 15px; border-radius: 8px; border: none; background: var(--navy); color: white; font-weight: bold; cursor: pointer;">Personal Information</button>
+            <button type="button" class="settings-tab-btn" onclick="openTab('security')" style="text-align: left; padding: 10px 15px; border-radius: 8px; border: none; background: transparent; color: var(--ink); cursor: pointer;">Security</button>
+            <button type="button" class="settings-tab-btn" onclick="openTab('notifications')" style="text-align: left; padding: 10px 15px; border-radius: 8px; border: none; background: transparent; color: var(--ink); cursor: pointer;">Notifications</button>
+            <button type="button" class="settings-tab-btn" onclick="openTab('preferences')" style="text-align: left; padding: 10px 15px; border-radius: 8px; border: none; background: transparent; color: var(--ink); cursor: pointer;">Preferences</button>
+            {% if current_user.role == 'student' %}
+            <button type="button" class="settings-tab-btn" onclick="openTab('danger')" style="text-align: left; padding: 10px 15px; border-radius: 8px; border: none; background: transparent; color: var(--danger); font-weight: bold; cursor: pointer;">Danger Zone</button>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <!-- TAB CONTENT -->
+    <div>
+        
+        <!-- PROFILE TAB -->
+        <section id="tab-profile" class="settings-tab-content box">
+            <div class="box-heading">
+                <h2>Personal Information</h2>
+                <p>Your basic account details.</p>
+            </div>
+            <form method="POST" action="{{ url_for('settings_profile') }}" class="form-stack">
+                {{ ui.csrf() }}
+                <label>Full Name<input value="{{ current_user.name }}" disabled></label>
+                <label>{{ 'Student Number' if current_user.role == 'student' else 'Faculty ID' }}<input value="{{ current_user.student_number or current_user.faculty_id }}" disabled></label>
+                {% if current_user.role == 'student' %}
+                <label>Section<input value="{{ current_user.section }}" disabled></label>
+                <label>Program<input value="{{ current_user.program }}" disabled></label>
+                {% endif %}
+                <label>Email Address<input name="email" type="email" value="{{ current_user.email }}" required></label>
+                <button class="btn btn-primary" type="submit" style="width: fit-content;">Save Changes</button>
+            </form>
+        </section>
+
+        <!-- SECURITY TAB -->
+        <section id="tab-security" class="settings-tab-content box" style="display: none;">
+            <div class="box-heading">
+                <h2>Security</h2>
+                <p>Manage your password and sessions.</p>
+            </div>
+            <div class="form-stack">
+                <a href="{{ url_for('change_password') }}" class="btn btn-light" style="width: fit-content;">Change Password</a>
+                <div style="padding: 15px; background: var(--paper-deep); border-radius: 8px;">
+                    <p style="margin: 0; font-size: 13px;"><strong>Active Session:</strong> Chrome on Windows (This device)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOTIFICATIONS TAB -->
+        <section id="tab-notifications" class="settings-tab-content box" style="display: none;">
+            <div class="box-heading">
+                <h2>Notifications</h2>
+                <p>Choose what emails you want to receive.</p>
+            </div>
+            <form method="POST" action="{{ url_for('settings_preferences') }}" class="form-stack">
+                {{ ui.csrf() }}
+                {% if current_user.role == 'student' %}
+                <label style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                    <input type="checkbox" name="notif_register" {% if prefs.get('notif_register') %}checked{% endif %} style="width: auto; min-height: auto;"> Email me when I register for an event.
+                </label>
+                <label style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                    <input type="checkbox" name="notif_waitlist" {% if prefs.get('notif_waitlist') %}checked{% endif %} style="width: auto; min-height: auto;"> Email me if I get promoted from a waitlist.
+                </label>
+                <label style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                    <input type="checkbox" name="notif_reminders" {% if prefs.get('notif_reminders') %}checked{% endif %} style="width: auto; min-height: auto;"> Email me 1 day before an event.
+                </label>
+                {% elif current_user.role == 'professor' %}
+                <label style="display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                    <input type="checkbox" name="notif_register" checked style="width: auto; min-height: auto;"> Email me when a student in my section registers.
+                </label>
+                {% endif %}
+                <button class="btn btn-primary" type="submit" style="width: fit-content;">Save Preferences</button>
+            </form>
+        </section>
+
+        <!-- PREFERENCES TAB -->
+        <section id="tab-preferences" class="settings-tab-content box" style="display: none;">
+            <div class="box-heading">
+                <h2>Preferences</h2>
+                <p>Customize your experience.</p>
+            </div>
+            <div class="form-stack">
+                <label style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; cursor: pointer; padding: 15px; background: var(--paper); border-radius: 8px; border: 1px solid var(--line);">
+                    <span style="font-weight: bold; font-size: 14px; color: var(--ink);">Enable Dark Mode</span>
+                    <input type="checkbox" id="theme-toggle" style="width: 20px; height: 20px; cursor: pointer;" onchange="toggleTheme()">
+                </label>
+            </div>
+        </section>
+
+        <!-- DANGER ZONE TAB (Student Only) -->
+        {% if current_user.role == 'student' %}
+        <section id="tab-danger" class="settings-tab-content box" style="display: none; border: 1px solid var(--danger);">
+            <div class="box-heading">
+                <h2 style="color: var(--danger);">Danger Zone</h2>
+                <p>Once you delete your account, there is no going back.</p>
+            </div>
+            <form method="POST" action="{{ url_for('settings_delete') }}" data-confirm="Are you absolutely sure you want to delete your account? This cannot be undone." data-confirm-title="Delete Account?" data-confirm-ok="Yes, delete my account">
+                {{ ui.csrf() }}
+                <button class="btn btn-danger" type="submit">Delete Account</button>
+            </form>
+        </section>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- TAB SWITCHING SCRIPT -->
+<script>
+    function openTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll('.settings-tab-content').forEach(tab => {
+            tab.style.display = 'none';
+        });
+        
+        // Reset all buttons to default style
+        document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--ink)';
+            btn.style.fontWeight = 'normal';
+        });
+
+        // Show selected tab
+        document.getElementById('tab-' + tabName).style.display = 'block';
+
+        // Highlight clicked button
+        const activeBtn = event.currentTarget;
+        activeBtn.style.background = 'var(--navy)';
+        activeBtn.style.color = 'white';
+        activeBtn.style.fontWeight = 'bold';
+    }
+</script>
+
+<script>
+    // Check local storage on load to set the checkbox state
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        const toggle = document.getElementById('theme-toggle');
+        
+        if (savedTheme === 'dark' && toggle) {
+            toggle.checked = true;
+        }
+    });
+
+    // Function to toggle theme
+    function toggleTheme() {
+        const isDark = document.getElementById('theme-toggle').checked;
+        if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+</script>
+{% endblock %}

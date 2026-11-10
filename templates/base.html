@@ -1,0 +1,94 @@
+{% import "_ui.html" as ui with context %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#142b4a">
+    <title>{% block title %}LSPU Event Management System{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    {% set homes = {'admin': 'admin_home', 'professor': 'professor_home', 'student': 'student_home'} %}
+    {% set authed = current_user.is_authenticated %}
+    {% set ep = request.endpoint %}
+    <header class="site-header">
+        <div class="header-inner">
+            <a class="brand" href="{{ url_for(homes[current_user.role]) if authed else url_for('landing') }}" aria-label="LSPU Event Management System home">
+                <span class="brand-mark"><img src="{{ url_for('static', filename='lspu-logo.png') }}" alt="LSPU logo" class="school-logo"></span>
+                <span class="brand-copy"><strong>LSPU</strong><small>EVENT MANAGEMENT</small></span>
+            </a>
+            {% if authed %}
+            <nav class="main-nav" aria-label="Main">
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin_home') }}" {% if ep in ('admin_home','event_new','event_edit','expenses','expense_edit','event_registrations') %}aria-current="page"{% endif %}>Overview</a>
+                    <a href="{{ url_for('attendance_dashboard') }}" {% if ep == 'attendance_dashboard' %}aria-current="page"{% endif %}>Attendance</a>
+                    <a href="{{ url_for('admin_campus_content') }}" {% if ep == 'admin_campus_content' %}aria-current="page"{% endif %}>Campus content</a>
+                    <a href="{{ url_for('admin_directory') }}" {% if ep == 'admin_directory' %}aria-current="page"{% endif %}>Directory</a>
+                    <a href="{{ url_for('system_logs') }}" {% if ep == 'system_logs' %}aria-current="page"{% endif %}>Logs</a>
+                {% elif current_user.role == 'professor' %}
+                    <a href="{{ url_for('professor_home') }}" {% if ep == 'professor_home' %}aria-current="page"{% endif %}>Roster</a>
+                    <a href="{{ url_for('professor_events') }}" {% if ep in ('professor_events','professor_event_registrations') %}aria-current="page"{% endif %}>Events</a>
+                    <a href="{{ url_for('attendance_dashboard') }}" {% if ep == 'attendance_dashboard' %}aria-current="page"{% endif %}>Attendance</a>
+                {% else %}
+                    <a href="{{ url_for('student_home') }}" {% if ep in ('student_home','event_detail','receipt') %}aria-current="page"{% endif %}>Events</a>
+                {% endif %}
+            </nav>
+            {% endif %}
+            <div class="header-right">
+                {% if authed %}
+                <details class="user-menu">
+                    <summary aria-label="Account menu"><span class="user-avatar" aria-hidden="true">{{ current_user.name[:1]|upper }}</span><span class="user-name">{{ current_user.name }}</span>{{ ui.ico('chev', 'chev') }}</summary>
+                    <div class="menu-panel">
+                        <div class="menu-head"><strong>{{ current_user.name }}</strong><span>{{ current_user.role|capitalize }} account</span></div>
+                        <a class="menu-item" href="{{ url_for('settings') }}">{{ ui.ico('settings') }}Settings</a>
+                        <a class="menu-item" href="{{ url_for('change_password') }}">{{ ui.ico('lock') }}Change password</a>
+                        <a class="menu-item danger" href="{{ url_for('sign_out') }}">{{ ui.ico('logout') }}Log out</a>
+                    </div>
+                </details>
+                {% else %}
+                <span class="header-context">STA. CRUZ · CAMPUS EVENTS</span>
+                <a class="header-home" href="{{ url_for('landing') }}">Home {{ ui.ico('arrow-ur') }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="page-shell" id="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flashes">
+            {% for category, message in messages %}
+                <div class="flash {{ category }}" role="{{ 'alert' if category in ['error','danger'] else 'status' }}"><span class="flash-mark" aria-hidden="true">{{ ui.ico('alert' if category in ['error','danger','warning'] else 'check') }}</span><span>{{ message }}</span><button type="button" class="flash-close" aria-label="Dismiss message">&times;</button></div>
+            {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer"><span class="footer-brand">LSPU <i>×</i> CAMPUS LIFE</span><span>Event Management System <span class="footer-dot">•</span> Educational Project</span></footer>
+
+    {% if authed %}
+    <dialog class="confirm" id="confirm-dialog" aria-labelledby="confirm-title">
+        <form method="dialog">
+            <div class="d-body"><h2 id="confirm-title" data-d-title>Please confirm</h2><p data-d-text></p></div>
+            <div class="d-foot">
+                <button class="btn btn-light" value="cancel">Cancel</button>
+                <button class="btn btn-danger" value="ok" data-d-ok>Confirm</button>
+            </div>
+        </form>
+    </dialog>
+    {% endif %}
+</body>
+</html>

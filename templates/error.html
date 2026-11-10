@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Error {{ code }} · LSPU{% endblock %}
+{% block content %}
+<section class="error-page"><span class="error-code" aria-hidden="true">{{ code }}</span><p class="eyebrow"><span class="eyebrow-line"></span> SOMETHING WENT OFF TRACK</p><h1>Let's get you<br>back on course<span>.</span></h1><p>{{ message }}</p><a class="btn btn-primary" href="{{ url_for('landing') }}">Return to home {{ ui.ico('arrow-r') }}</a></section>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Campus Bulletin · LSPU{% endblock %}
+{% block content %}
+<section class="admin-intro"><div class="heading"><div><small>ADMINISTRATION / HOMEPAGE</small><h1>Campus Bulletin<span>.</span></h1><p>Publish featured stories, campus announcements, and photo updates for the public homepage.</p></div><a class="btn btn-light" href="{{ url_for('landing') }}" target="_blank" rel="noopener">Preview homepage ↗</a></div></section>
+<section class="section">
+  <div class="section-head"><div><p class="section-overline">01 / CREATE A POST</p><h2>Publish a campus story</h2><p class="muted">The newest published story becomes the featured story on the homepage.</p></div></div>
+  <div class="box"><form method="POST" enctype="multipart/form-data" class="form-stack">
+    {{ ui.csrf() }}
+    <div class="two"><label>Story / announcement title<input name="title" maxlength="180" required placeholder="e.g. LSPU celebrates University Week"></label><label>Short caption<input name="summary" maxlength="300" placeholder="A short preview shown on the homepage"></label></div>
+    <label>Full story / announcement<textarea name="body" rows="8" required placeholder="Write the full announcement, article, or campus update..."></textarea></label>
+    <div class="two"><label>Featured cover photo <span class="muted">(optional · JPG, PNG, WEBP)</span><input type="file" name="image" accept=".jpg,.jpeg,.png,.webp"></label><label>Featured main video <span class="muted">(optional · MP4, WEBM, MOV; up to 250 MB)</span><input type="file" name="video" accept=".mp4,.webm,.mov"></label></div>
+    <p class="muted">Upload a cover photo, a featured video, or both. If both are provided, the video appears as the main feature and the photo is used as its poster image.</p>
+    <div class="two"><label>Additional photos <span class="muted">(optional; select multiple)</span><input type="file" name="photos" accept=".jpg,.jpeg,.png,.webp" multiple></label><label>Additional videos <span class="muted">(optional; select multiple)</span><input type="file" name="videos" accept=".mp4,.webm,.mov" multiple></label></div>
+    <label>Media caption <span class="muted">(optional; applies to newly uploaded additional photos and videos)</span><input name="media_caption" maxlength="240" placeholder="Describe these campus moments"></label>
+    <div><button class="btn btn-primary" type="submit">{{ ui.ico('upload') }} Publish campus story</button></div>
+  </form></div>
+  <div class="section-head" style="margin-top:34px"><div><p class="section-overline">02 / MANAGE POSTS</p><h2>Published stories and drafts</h2></div></div>
+  <div class="content-manage-list">
+    {% for item in announcements.items %}
+    <article class="content-manage-item">
+      {% if item.image_filename %}<img src="{{ url_for('static', filename='uploads/' ~ item.image_filename) }}" alt="">{% elif item.video_filename %}<video muted preload="metadata"><source src="{{ url_for('static', filename='uploads/' ~ item.video_filename) }}"></video>{% endif %}
+      <div class="content-manage-copy"><small>{{ item.created_at.strftime('%b %d, %Y') }} · {{ 'Published' if item.published else 'Draft' }} · {{ item.photos|length }} photos · {{ item.videos|length }} videos</small><h3>{{ item.title }}</h3><p>{{ item.summary or item.body[:150] }}</p></div>
+      <div class="content-manage-actions"><a class="btn btn-light btn-sm" href="{{ url_for('edit_announcement', item_id=item.id) }}">Edit</a><form method="POST" action="{{ url_for('toggle_announcement', item_id=item.id) }}">{{ ui.csrf() }}<button class="btn btn-light btn-sm" type="submit">{{ 'Unpublish' if item.published else 'Publish' }}</button></form><form method="POST" action="{{ url_for('delete_announcement', item_id=item.id) }}" data-confirm="This story, its cover, and all additional photos and videos will be deleted." data-confirm-title="Delete campus story?">{{ ui.csrf() }}<button class="btn btn-danger btn-sm" type="submit">Delete</button></form></div>
+    </article>
+    {% else %}<p class="empty-note">No campus stories yet. Publish the first one above.</p>{% endfor %}
+    {% if announcements.pages > 1 %}<nav class="bulletin-pagination" aria-label="Admin announcement pages">{% if announcements.has_prev %}<a href="{{ url_for('admin_campus_content', page=announcements.prev_num) }}">← Previous</a>{% endif %}<span>Page {{ announcements.page }} of {{ announcements.pages }}</span>{% if announcements.has_next %}<a href="{{ url_for('admin_campus_content', page=announcements.next_num) }}">Next →</a>{% endif %}</nav>{% endif %}
+  </div>
+</section>
+{% endblock %}

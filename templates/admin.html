@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Admin dashboard · LSPU{% endblock %}
+{% block content %}
+{% set live_count = events|selectattr('status','in',['Ongoing','Lunch Break'])|list|length %}
+<section class="admin-intro">
+  <div class="heading"><div><small>ADMINISTRATION / OVERVIEW</small><h1>Good day, administrator<span>.</span></h1><p>Your overview of campus events, registrations, and system activity.</p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn btn-light" href="{{ url_for('admin_campus_content') }}">Manage campus content</a><a class="btn btn-primary" href="{{ url_for('event_new') }}">{{ ui.ico('plus') }} Create event</a></div></div>
+  <div class="stats">
+    <div><span>Total events</span><b>{{ events|length+past|length }}</b><small class="stat-caption">{{ events|length }} active · {{ past|length }} archived</small></div>
+    <div class="{{ 'is-live' if live_count else '' }}"><span>Happening now</span><b>{{ live_count }}</b><small class="stat-caption">Ongoing or on lunch break</small></div>
+    <div><span>Total registrations</span><b>{{ registration_count }}</b><small class="stat-caption">Current system records</small></div>
+  </div>
+</section>
+
+<!-- ACCOUNTS SECTION -->
+<section class="section">
+  <div class="section-head">
+    <div>
+      <p class="section-overline">00 / ACCOUNTS</p>
+      <h2>Account Management</h2>
+    </div>
+    <details style="position: relative;">
+        <summary class="btn btn-primary" style="list-style: none; cursor: pointer;">+ Create Professor Account</summary>
+        <div class="box" style="position: absolute; right: 0; top: calc(100% + 10px); z-index: 50; width: 350px; box-shadow: var(--shadow-2); margin-top: 5px;">
+            <div class="box-heading" style="margin-bottom: 15px;">
+                <h3 style="margin: 0 0 5px; font-size: 18px;">New Faculty</h3>
+                <p style="margin: 0; font-size: 12px; color: var(--muted);">Give the ID and temporary password to the professor.</p>
+            </div>
+            <form method="POST" action="{{ url_for('create_professor') }}" class="form-stack" style="gap: 12px;">
+                {{ ui.csrf() }}
+                <label style="font-size: 11px;">Full Name<input name="name" required style="min-height: 36px;"></label>
+                <label style="font-size: 11px;">Faculty ID
+                    <input name="faculty_id" required style="min-height: 36px; text-transform: uppercase;" placeholder="FAC-0000-0000" pattern="FAC-\d{4}-\d{4}" title="Format: FAC-0000-0000">
+                </label>
+                
+                <div style="border: 1px solid var(--line-strong); border-radius: var(--r-sm); padding: 10px; max-height: 200px; overflow-y: auto; background: var(--surface);">
+                    <span style="font-size: 11px; font-weight: bold; margin-bottom: 5px; display: block;">Handled Sections</span>
+                    
+                    <p style="margin: 5px 0; font-size: 11px; font-weight: bold; color: var(--blue);">BSCS</p>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSCS 1A" style="width: auto; min-height: auto;"> BSCS 1A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSCS 1B" style="width: auto; min-height: auto;"> BSCS 1B</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSCS 2A" style="width: auto; min-height: auto;"> BSCS 2A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSCS 2B" style="width: auto; min-height: auto;"> BSCS 2B</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSCS 3A" style="width: auto; min-height: auto;"> BSCS 3A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSCS 3B" style="width: auto; min-height: auto;"> BSCS 3B</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSCS 4A" style="width: auto; min-height: auto;"> BSCS 4A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 10px;"><input type="checkbox" name="sections" value="BSCS 4B" style="width: auto; min-height: auto;"> BSCS 4B</label>
+
+                    <p style="margin: 5px 0; font-size: 11px; font-weight: bold; color: var(--gold-deep);">BSIT</p>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 1A" style="width: auto; min-height: auto;"> BSIT 1A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 1B" style="width: auto; min-height: auto;"> BSIT 1B</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 2A" style="width: auto; min-height: auto;"> BSIT 2A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 2B" style="width: auto; min-height: auto;"> BSIT 2B</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 3A" style="width: auto; min-height: auto;"> BSIT 3A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 3B" style="width: auto; min-height: auto;"> BSIT 3B</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 3C" style="width: auto; min-height: auto;"> BSIT 3C</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 3D" style="width: auto; min-height: auto;"> BSIT 3D</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 4A" style="width: auto; min-height: auto;"> BSIT 4A</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 4B" style="width: auto; min-height: auto;"> BSIT 4B</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 4C" style="width: auto; min-height: auto;"> BSIT 4C</label>
+                    <label style="display: flex; flex-direction: row; align-items: center; gap: 5px; font-size: 11px; margin-bottom: 4px;"><input type="checkbox" name="sections" value="BSIT 4D" style="width: auto; min-height: auto;"> BSIT 4D</label>
+                </div>
+
+                <label style="font-size: 11px;">Temporary Password<input name="temp_password" type="text" required minlength="8" style="min-height: 36px;"></label>
+                <button class="btn btn-primary" type="submit" style="margin-top: 5px;">Create Account</button>
+            </form>
+        </div>
+    </details>
+  </div>
+
+  <div class="box">
+      <div class="box-heading"><p class="section-overline">DIRECTORY</p><h2>Faculty</h2></div>
+      <div class="tablebox" style="box-shadow: none;">
+          <table class="t-stack">
+              <thead><tr><th>Name</th><th>Faculty ID</th><th>Email</th></tr></thead>
+              <tbody>
+                  {% for p in professors %}
+                  <tr>
+                      <td><strong>{{ p.name }}</strong></td>
+                      <td class="mono-cell">{{ p.faculty_id }}</td>
+                      <td>{{ p.email[:3] }}****{{ p.email.split('@')[1] if '@' in p.email else '' }}</td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="3">No professors yet.</td></tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+  </div>
+
+  <div class="box" style="margin-top: 20px;">
+      <div class="box-heading"><p class="section-overline">DIRECTORY</p><h2>Students</h2></div>
+      <div class="tablebox" style="box-shadow: none;">
+          <table class="t-stack">
+              <thead><tr><th>Name</th><th>Student Number</th><th>Section</th><th>Email</th></tr></thead>
+              <tbody>
+                  {% for s in students %}
+                  <tr>
+                      <td><strong>{{ s.name }}</strong></td>
+                      <td class="mono-cell">{{ s.student_number }}</td>
+                      <td><span class="table-tag">{{ s.section }}</span></td>
+                      <td>{{ s.email[:3] }}****{{ s.email.split('@')[1] if '@' in s.email else '' }}</td>
+                  </tr>
+                  {% else %}
+                  <tr><td colspan="4">No students yet.</td></tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head"><div><p class="section-overline">01 / EVENT OPERATIONS</p><h2>Active events</h2></div></div>
+  <div class="tablebox tablebox--menu"><table class="t-stack"><thead><tr><th>Event</th><th>Date</th><th>Registration</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+  {% for e in events %}
+  {% set confirmed = e.confirmed_count %}
+  <tr>
+    <td data-label="Event"><div class="cell-event"><span class="thumb">{{ ui.media(e) }}</span><div><strong>{{ e.title }}</strong><small>{{ e.venue }} · {{ e.program }}</small></div></div></td>
+    <td data-label="Date" class="date-cell">{{ ui.d(e.event_date) }}<small>{{ ui.t(e.start_time) }} to {{ ui.t(e.end_time) }}</small></td>
+    <td data-label="Registration" style="min-width:150px"><strong class="tnum">{{ confirmed }}/{{ e.capacity }}</strong><small>{{ e.waiting_count }} waiting</small><div style="margin-top:8px">{{ ui.meter(confirmed, e.capacity) }}</div></td>
+    <td data-label="Status">
+        {{ ui.pill(e) }}
+    </td>
+    <td data-label="Actions" class="actions">
+      <div class="row-actions">
+        <a class="btn btn-light btn-sm" href="{{ url_for('event_registrations', eid=e.id) }}">Registrations</a>
+        <a class="btn btn-light btn-sm" href="{{ url_for('expenses', eid=e.id) }}">Expenses</a>
+        <a class="btn btn-light btn-sm" href="{{ url_for('event_edit', eid=e.id) }}">Edit</a>
+        
+        <details class="more">
+          <summary aria-label="More actions for {{ e.title }}">{{ ui.ico('dots') }}</summary>
+          <div class="menu-panel">
+            
+            <!-- MANUAL STATUS OVERRIDE -->
+            <div style="padding: 10px 12px; border-bottom: 1px solid var(--line); margin-bottom: 5px;">
+                <p style="font-size: 10px; font-weight: 800; color: var(--muted); margin-bottom: 5px; text-transform: uppercase;">Override Status</p>
+                <form method="POST" action="{{ url_for('event_status', eid=e.id) }}">
+                    {{ ui.csrf() }}
+                    <select name="status" onchange="this.form.submit()" style="min-height: 28px; padding: 4px 8px; font-size: 11px; width: 100%; border-radius: 4px;">
+                        <option value="Auto" {% if e.manual_status == 'Auto' %}selected{% endif %}>Auto (System)</option>
+                        <option value="Not started yet" {% if e.manual_status == 'Not started yet' %}selected{% endif %}>Not started yet</option>
+                        <option value="Ongoing" {% if e.manual_status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                        <option value="Lunch Break" {% if e.manual_status == 'Lunch Break' %}selected{% endif %}>Lunch Break</option>
+                        <option value="Ended" {% if e.manual_status == 'Ended' %}selected{% endif %}>Ended</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- Event management actions -->
+            {% if e.status=='Ended' %}
+            <form method="post" action="{{ url_for('event_archive', eid=e.id) }}">{{ ui.csrf() }}<button class="menu-item" type="submit">{{ ui.ico('archive') }}Archive event</button></form>
+            {% endif %}
+            
+            <form method="post" action="{{ url_for('event_delete', eid=e.id) }}" data-confirm="“{{ e.title }}” will be deleted. Events that already have registrations or expenses cannot be deleted." data-confirm-title="Delete this event?" data-confirm-ok="Delete event">{{ ui.csrf() }}<button class="menu-item danger" type="submit">{{ ui.ico('trash') }}Delete event</button></form>
+          
+          </div>
+        </details>
+      </div>
+    </td>
+  </tr>
+  {% else %}<tr><td colspan="5" class="no-label"><div class="table-empty"><strong>No active events.</strong><span>Create an event to start organizing campus activities.</span></div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="section">
+  <div class="section-head"><div><p class="section-overline">02 / FINANCIAL OVERVIEW</p><h2>Past events &amp; expenses</h2></div></div>
+  <div class="tablebox"><table class="t-stack"><thead><tr><th>Event</th><th>Date</th><th>Program</th><th>Participants</th><th>Total expenses</th><th>Breakdown</th></tr></thead><tbody>
+  {% for e in past %}<tr>
+    <td data-label="Event"><strong>{{ e.title }}</strong>{% if e.description %}<small>{{ e.description[:80] }}{{ '…' if e.description|length > 80 }}</small>{% endif %}</td>
+    <td data-label="Date" class="date-cell">{{ ui.d(e.event_date) }}</td>
+    <td data-label="Program"><span class="table-tag">{{ e.program }}</span></td>
+    <td data-label="Participants" class="tnum">{{ e.confirmed_count }}</td>
+    <td data-label="Expenses" class="money-cell">{{ ui.peso(e.total_expenses) }}</td>
+    <td data-label="Breakdown"><a class="btn btn-light btn-sm" href="{{ url_for('expenses', eid=e.id) }}">View details {{ ui.ico('arrow-ur') }}</a></td>
+  </tr>
+  {% else %}<tr><td colspan="6" class="no-label"><div class="table-empty"><strong>No past events to show.</strong><span>Ended and archived events will appear here.</span></div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<!-- NEW SECTION: DATABASE MAINTENANCE -->
+<section class="section">
+  <div class="section-head"><div><p class="section-overline">03 / SYSTEM MAINTENANCE</p><h2>Database Backup & Restore</h2></div></div>
+  
+  <div class="two">
+    <!-- DOWNLOAD BACKUP -->
+    <div class="box">
+        <div class="box-heading"><p class="section-overline">EXPORT</p><h2>Download Backup</h2><p>Download a copy of the database file to keep it safe.</p></div>
+        <a class="btn btn-primary" href="{{ url_for('download_backup') }}">{{ ui.ico('download') }} Download Database (.db)</a>
+    </div>
+
+    <!-- RESTORE BACKUP -->
+    <div class="box" style="border: 1px solid var(--danger);">
+        <div class="box-heading"><p class="section-overline" style="color: var(--danger);">IMPORT</p><h2>Restore Database</h2><p>Upload a .db file to overwrite the current database.</p></div>
+        <form method="POST" action="{{ url_for('restore_backup') }}" enctype="multipart/form-data" data-confirm="WARNING: This will overwrite all current data. Are you sure?" data-confirm-title="Restore Database?" data-confirm-ok="Yes, overwrite" style="display: flex; flex-direction: column; align-items: center;">
+            {{ ui.csrf() }}
+            <label style="width: 100%;">Select Backup File (.db)<input type="file" name="backup_file" accept=".db" required></label>
+            <button class="btn btn-danger" type="submit" style="margin-top: 15px; width: fit-content;">{{ ui.ico('upload') }} Upload & Restore</button>
+        </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

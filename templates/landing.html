@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Welcome · LSPU Event Management System{% endblock %}
+{% block content %}
+<section class="landing-hero">
+  <div class="hero-copy">
+    <div class="eyebrow"><span class="eyebrow-line"></span> LAGUNA STATE POLYTECHNIC UNIVERSITY</div>
+    <p class="hero-kicker">CAMPUS EVENT MANAGEMENT SYSTEM</p>
+    <h1>Campus life,<br><em>in motion.</em></h1>
+    <p class="hero-description">Discover what's happening on campus, register for events, and keep every campus experience in one place.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="{{ url_for('sign_in', role='student') }}">Student portal {{ ui.ico('arrow-ur', 'ico-go') }}</a>
+      <a class="btn btn-light" href="#portals">All portals</a>
+    </div>
+    <div class="hero-note"><span class="note-dot"></span> Your campus. Your community. Your next experience.</div>
+  </div>
+
+  <div class="campus-bulletin-feature">
+    <div class="bulletin-heading">
+      <div><p class="eyebrow"><span class="eyebrow-line"></span> EVENTS · PEOPLE · COMMUNITY</p><h2>What's happening<br>on campus<span>?</span></h2></div>
+      <span class="bulletin-mark">LSPU / NEWS</span>
+    </div>
+    {% if featured_announcement %}
+    <a class="bulletin-feature-card" href="{{ url_for('announcement_detail', item_id=featured_announcement.id) }}">
+      <div class="bulletin-feature-image">{% if featured_announcement.video_filename %}<video muted autoplay loop playsinline preload="metadata" poster="{{ url_for('static', filename='uploads/' ~ featured_announcement.image_filename) if featured_announcement.image_filename else '' }}"><source src="{{ url_for('static', filename='uploads/' ~ featured_announcement.video_filename) }}"></video>{% elif featured_announcement.image_filename %}<img src="{{ url_for('static', filename='uploads/' ~ featured_announcement.image_filename) }}" alt="{{ featured_announcement.title }}">{% endif %}<span class="bulletin-feature-tag">FEATURED CAMPUS STORY{% if featured_announcement.video_filename %} · VIDEO{% endif %}</span><span class="bulletin-photo-count">{{ featured_announcement.photos|length }} photos · {{ featured_announcement.videos|length }} videos</span></div>
+      <div class="bulletin-feature-copy"><small>{{ featured_announcement.created_at.strftime('%B %d, %Y') }}</small><h3>{{ featured_announcement.title }}</h3><p>{{ featured_announcement.summary or featured_announcement.body|striptags|truncate(170) }}</p><span class="bulletin-read-link">Read full story {{ ui.ico('arrow-ur') }}</span></div>
+    </a>
+    {% else %}
+    <div class="bulletin-empty">
+      <div class="bulletin-empty-top"><span>THE LSPU CAMPUS CALENDAR</span><span>LSPU / 01</span></div>
+      <div class="bulletin-empty-content">
+        <span class="bulletin-empty-icon">{{ ui.ico('spark') }}</span>
+        <p class="bulletin-empty-overline">A CAMPUS FULL OF POSSIBILITIES</p>
+        <h3>Something worth<br>showing up for.</h3>
+        <p>The next campus highlight will appear here when an administrator features an event.</p>
+      </div>
+      <div class="bulletin-empty-bottom"><span>EVENTS · PEOPLE · COMMUNITY</span><span class="bulletin-empty-rule"></span><span>01 — LSPU</span></div>
+    </div>
+    {% endif %}
+    {% if announcements.items %}
+    <div class="bulletin-recent">
+      <div class="bulletin-recent-heading"><strong>MORE FROM CAMPUS</strong><span>Latest updates</span></div>
+      {% for item in announcements.items %}
+      <a class="bulletin-recent-item" href="{{ url_for('announcement_detail', item_id=item.id) }}"><span class="bulletin-recent-date">{{ item.created_at.strftime('%b %d') }}</span><span class="bulletin-recent-title">{{ item.title }}</span>{{ ui.ico('arrow-ur') }}</a>
+      {% endfor %}
+      {% if announcements.pages > 1 %}<nav class="bulletin-pagination" aria-label="Campus announcements pages">{% if announcements.has_prev %}<a href="{{ url_for('landing', page=announcements.prev_num) }}">← Newer</a>{% endif %}<span>Page {{ announcements.page }} of {{ announcements.pages }}</span>{% if announcements.has_next %}<a href="{{ url_for('landing', page=announcements.next_num) }}">Older →</a>{% endif %}</nav>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="journey" aria-label="How it works">
+  <div><span class="step-n">1</span><div><strong>Discover</strong><span>Browse campus events and see how many seats are left.</span></div></div>
+  <div><span class="step-n">2</span><div><strong>Register</strong><span>Confirm your details and reserve a seat, or join the waiting list.</span></div></div>
+  <div><span class="step-n">3</span><div><strong>Get your receipt</strong><span>Keep a printable confirmation for event verification.</span></div></div>
+  <div><span class="step-n">4</span><div><strong>Check in</strong><span>Organizers record your time-in and time-out at the attendance desk.</span></div></div>
+</section>
+
+<section class="portal-section" id="portals" aria-labelledby="portal-heading">
+  <div class="section-intro"><div><p class="eyebrow"><span class="eyebrow-line"></span> YOUR SPACE TO BEGIN</p><h2 id="portal-heading">Choose your portal<span>.</span></h2></div><p>Continue to the workspace designed for your role.</p></div>
+  <div class="portal-grid">
+    {% for role, desc in [('student', 'Discover campus activities, register for events, and keep your receipts in one place.'), ('professor', 'Access assigned sections and manage student roster exports.'), ('admin', 'Coordinate events, accounts, expenses, and system activity.')] %}
+    <a class="portal-card portal-{{ role }}" href="{{ url_for('sign_in', role=role) }}"><div class="portal-card-top"><span class="portal-number">0{{ loop.index }}</span><span class="portal-icon">{{ ui.ico({'student':'cap','professor':'board','admin':'shield'}[role]) }}</span></div><div class="portal-card-copy"><p class="portal-overline">{{ {'student':'FOR STUDENTS','professor':'FOR FACULTY','admin':'FOR ADMINISTRATION'}[role] }}</p><h3>{{ role.title() }}</h3><p>{{ desc }}</p></div><div class="portal-card-bottom"><span>Enter portal</span><span class="portal-arrow">{{ ui.ico('arrow-ur') }}</span></div></a>
+    {% endfor %}
+  </div>
+</section>
+<section class="landing-footnote"><span class="footnote-mark">{{ ui.ico('spark') }}</span><p>Good things happen when a campus comes together.</p><span class="footnote-rule"></span></section>
+{% endblock %}

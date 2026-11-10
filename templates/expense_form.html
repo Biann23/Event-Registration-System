@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Edit expense · LSPU{% endblock %}
+{% block content %}
+<a class="crumb" href="{{ url_for('expenses', eid=expense.event_id) }}">{{ ui.ico('arrow-l') }} Back to expenses</a>
+<section class="page-heading compact-heading" style="padding-top:26px"><div><p class="eyebrow"><span class="eyebrow-line"></span> FINANCIAL RECORDS</p><h1>Edit expense<span>.</span></h1><p class="heading-description">Update the expense record for {{ expense.event.title }}.</p></div></section>
+<form class="mform mform-narrow" method="post" data-lock>{{ ui.csrf() }}
+  <div class="fsec"><div class="fields">
+    <label class="full">Expense label<input name="label" maxlength="160" required value="{{ expense.label }}"></label>
+    <label class="full">Amount (₱)<input name="amount" type="number" min="0" step="0.01" required inputmode="decimal" value="{{ '%.2f'|format(expense.amount) }}"></label>
+    <label class="full">Notes<textarea name="notes" maxlength="400" rows="4">{{ expense.notes or '' }}</textarea></label>
+  </div></div>
+  <div class="fbar"><button class="btn btn-primary" type="submit" data-busy="Saving">Save changes {{ ui.ico('arrow-r') }}</button><a class="btn btn-light" href="{{ url_for('expenses', eid=expense.event_id) }}">Cancel</a></div>
+</form>
+{% endblock %}

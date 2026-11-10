@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Edit account · LSPU{% endblock %}
+{% block content %}
+<a class="crumb" href="{{ url_for('accounts') }}">{{ ui.ico('arrow-l') }} Back to accounts</a>
+<section class="page-heading compact-heading" style="padding-top:26px"><div><p class="eyebrow"><span class="eyebrow-line"></span> ADMIN WORKSPACE</p><h1>Edit account<span>.</span></h1><p class="heading-description">Update this user's details. Leave the password blank to keep the current password.</p></div></section>
+<form class="mform" method="post" data-lock>{{ ui.csrf() }}
+  <div class="fsec">
+    <div class="fsec-head"><span class="fnum">01</span><h2>Account information</h2><p>Name, email and role details for this account.</p></div>
+    <div class="fields">
+      <label>Role<input value="{{ user.role.title() }}" disabled></label>
+      <label>Full name<input name="name" required maxlength="120" value="{{ user.name }}"></label>
+      <label class="full">Email address<input name="email" type="email" required maxlength="160" value="{{ user.email }}"></label>
+      {% if user.role == 'student' %}
+      <label>Student number<input name="student_number" required maxlength="40" value="{{ user.student_number or '' }}"></label>
+      <label>Year level<select name="year_level">{% for y in ['First Year','Second Year','Third Year','Fourth Year'] %}<option {% if user.year_level == y %}selected{% endif %}>{{ y }}</option>{% endfor %}</select></label>
+      <label>Section<input name="section" required pattern="[1-4][A-Z]" maxlength="2" value="{{ user.section or '' }}"></label>
+      <label>Program<select name="program">{% for p in ['BSCS','BSIT'] %}<option {% if user.program == p %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></label>
+      {% else %}
+      <label class="full">Handled sections <span class="label-optional">COMMA SEPARATED</span><input name="handled_sections" value="{{ user.handled_sections or '' }}" placeholder="1A, 2B"></label>
+      {% endif %}
+    </div>
+  </div>
+  <div class="fsec">
+    <div class="fsec-head"><span class="fnum">02</span><h2>Password</h2><p>Optional. Use at least 12 characters.</p></div>
+    <div class="fields"><label class="full">New password <span class="label-optional">OPTIONAL · 12+ CHARACTERS</span><input name="password" type="password" minlength="12" autocomplete="new-password" placeholder="Leave blank to keep current password"></label></div>
+  </div>
+  <div class="fbar"><button class="btn btn-primary" type="submit" data-busy="Saving">Save changes {{ ui.ico('arrow-r') }}</button><a class="btn btn-light" href="{{ url_for('accounts') }}">Cancel</a></div>
+</form>
+{% endblock %}

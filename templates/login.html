@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}{{ role.title() }} login · LSPU{% endblock %}
+{% block content %}
+<div class="auth-shell">
+    <aside class="auth-aside on-dark">
+        <a class="back-link" href="{{ url_for('landing') }}">{{ ui.ico('arrow-l') }} All portals</a>
+        <div class="auth-story">
+            <span class="auth-seal"><img src="{{ url_for('static', filename='lspu-logo.png') }}" alt=""></span>
+            <p class="eyebrow" style="margin-top:28px"><span class="eyebrow-line"></span> {{ role.upper() }} PORTAL</p>
+            <h1>Your campus<br>workspace<span>.</span></h1>
+            <p class="auth-story-copy">Sign in to continue where campus life and coordination come together.</p>
+        </div>
+        <div class="auth-side-note"><span class="auth-side-mark">{{ ui.ico('spark') }}</span><span>One university.<br>Many ways to take part.</span></div>
+    </aside>
+    <section class="auth-panel">
+        <div class="auth-panel-heading"><span class="panel-overline">WELCOME BACK</span><h2>Sign in</h2><p>Enter your account details to continue.</p></div>
+        <form method="post" class="form-stack" data-lock>{{ ui.csrf() }}
+            <label>{% if role == 'professor' %}Faculty ID{% else %}Email address{% endif %}
+                <input name="email" type="{% if role == 'professor' %}text{% else %}email{% endif %}" autocomplete="username" placeholder="{% if role == 'professor' %}FAC-2026-001{% else %}you@lspu.edu.ph{% endif %}" required autofocus>
+            </label>
+            <label>Password<input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required></label>
+            <button class="btn btn-primary" type="submit" data-busy="Signing in">Continue to portal {{ ui.ico('arrow-r') }}</button>
+        </form>
+        {% if role == 'student' %}
+        <div class="auth-links">
+            <p>Can't access your account? <a href="{{ url_for('forgot_password', role=role) }}">Request a password reset</a></p>
+            <p>Don't have an account? <a href="{{ url_for('sign_up', role=role) }}">Register here</a></p>
+        </div>
+        {% endif %}
+        <div class="auth-panel-footer"><span class="secure-dot"></span> Your account is protected by role-based access.</div>
+    </section>
+</div>
+{% endblock %}

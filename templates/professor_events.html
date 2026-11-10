@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Campus events · LSPU{% endblock %}
+{% block content %}
+<section class="page-heading compact-heading">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> FACULTY WORKSPACE</p>
+        <h1>Campus events<br><em>and attendees.</em></h1>
+        <p class="heading-description">Browse campus events and see which students from your sections registered.</p>
+    </div>
+</section>
+
+<section class="section event-discovery" style="margin-top:40px">
+  <div class="section-head">
+    <div><p class="section-overline">THE EVENT BOARD</p><h2>All campus events<span style="color:var(--gold)">.</span></h2></div>
+    <form class="search-form" method="get" role="search" style="width:min(460px,100%)">
+      <div class="search-row">
+        <div class="search-field">{{ ui.ico('search') }}<label class="sr-only" for="event-search">Search events</label><input id="event-search" name="q" value="{{ term }}" placeholder="Search events or keywords"></div>
+        <button class="btn btn-dark" type="submit">Search</button>
+        {% if term %}<a class="btn btn-light" href="{{ url_for('professor_events') }}">Clear</a>{% endif %}
+      </div>
+    </form>
+  </div>
+
+  {% if events %}
+  <div class="section-head" style="margin-bottom:20px">
+    <p class="section-sub" role="status" style="margin:0">{{ events|length }} event{{ '' if events|length == 1 else 's' }}{% if term %} matching “{{ term }}”{% endif %}</p>
+    <div class="chips" data-chips role="group" aria-label="Filter by status">
+      <button type="button" class="chip" data-value="all" aria-pressed="true">All</button>
+      <button type="button" class="chip" data-value="now" aria-pressed="false">Happening now</button>
+      <button type="button" class="chip" data-value="soon" aria-pressed="false">Upcoming</button>
+      <button type="button" class="chip" data-value="ended" aria-pressed="false">Ended</button>
+    </div>
+  </div>
+  {% endif %}
+
+  <section class="event-grid">
+  {% for e in events %}
+    {% set confirmed = e.confirmed_count %}
+    <article class="ecard" data-status="{{ e.status | lower | replace(' ', '-') }}">
+      <div class="ecard-media">
+        {{ ui.media(e) }}
+        {{ ui.pill(e, True) }}
+        <span class="ecard-date" aria-hidden="true"><b>{{ e.event_date.day }}</b><span>{{ e.event_date.strftime('%b') }}</span></span>
+      </div>
+      <div class="ecard-body">
+        <div class="ecard-top"><span>{{ e.program }}</span><span>CAMPUS EVENT / {{ '%02d'|format(loop.index) }}</span></div>
+        <h3><a href="{{ url_for('professor_event_registrations', eid=e.id) }}">{{ e.title }}</a></h3>
+        <p class="ecard-desc">{{ e.description }}</p>
+        <div class="facts-inline">
+          <span>{{ ui.ico('calendar') }}{{ ui.d(e.event_date) }}</span>
+          <span>{{ ui.ico('clock') }}{{ ui.t(e.start_time) }} to {{ ui.t(e.end_time) }}</span>
+          <span>{{ ui.ico('pin') }}{{ e.venue }}</span>
+        </div>
+        <div class="meter-row" style="margin-top:6px"><span>Registration</span><span><b>{{ confirmed }}</b> / {{ e.capacity }}</span></div>
+        {{ ui.meter(confirmed, e.capacity) }}
+        <a class="btn btn-outline" style="margin-top:18px" href="{{ url_for('professor_event_registrations', eid=e.id) }}">View registered students {{ ui.ico('arrow-ur', 'ico-go') }}</a>
+      </div>
+    </article>
+  {% else %}
+    <div class="empty-state"><span class="empty-mark">{{ ui.ico('search') }}</span><h3>No events found</h3><p>Try another search, or check back when new campus events are posted.</p>{% if term %}<a class="btn btn-light" href="{{ url_for('professor_events') }}">Clear search</a>{% endif %}</div>
+  {% endfor %}
+    <div class="empty-state" id="chip-empty" hidden><span class="empty-mark">{{ ui.ico('calendar') }}</span><h3>Nothing in this view</h3><p>Try another filter to see more events.</p></div>
+  </section>
+</section>
+{% endblock %}

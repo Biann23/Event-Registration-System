@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Professor roster · LSPU{% endblock %}
+{% block content %}
+<section class="page-heading compact-heading">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> FACULTY WORKSPACE</p>
+        <h1>Hello, {{ current_user.name }}<span>.</span></h1>
+        <p class="heading-description">A clear view of students across your assigned sections.</p>
+    </div>
+</section>
+
+<section class="roster-summary">
+    <div>
+        <span class="summary-label">MY ASSIGNED SECTIONS</span>
+        <strong>{{ sections|length }}</strong>
+        <p>{{ sections|join(' · ') if sections else 'No sections assigned' }}</p>
+    </div>
+    <div>
+        <span class="summary-label">MY STUDENTS</span>
+        <strong>{{ students|length }}</strong>
+        <p>Total students in your sections</p>
+    </div>
+    <div>
+        <span class="summary-label">ONGOING EVENTS</span>
+        <strong>{{ ongoing_events }}</strong>
+        <p>Campus events happening right now</p>
+    </div>
+</section>
+
+<section class="data-section">
+    <div class="data-section-heading">
+        <div>
+            <p class="section-overline">SECTION DIRECTORY</p>
+            <h2>Your student list</h2>
+        </div>
+        <span class="record-count">{{ students|length }} RECORDS</span>
+    </div>
+    {% if students %}
+    <div class="search-row" style="margin-bottom:16px">
+        <div class="search-field">{{ ui.ico('search') }}<label class="sr-only" for="roster-filter">Filter students</label><input id="roster-filter" type="search" placeholder="Filter by name, student number, or section" data-filter="#roster" data-count="roster-count"></div>
+        <span id="roster-count" class="section-sub" role="status"></span>
+    </div>
+    {% endif %}
+    <div class="tablebox">
+        <table id="roster" class="t-stack">
+            <thead>
+                <tr>
+                    <th>Student number</th>
+                    <th>Student</th>
+                    <th>Email address</th>
+                    <th>Year</th>
+                    <th>Section</th>
+                    <th>Program</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td data-label="Student no." class="mono-cell">{{ s.student_number }}</td>
+                    <td data-label="Student"><strong>{{ s.name }}</strong></td>
+                    <td data-label="Email">{{ s.email[:3] }}****{{ s.email.split('@')[1] if '@' in s.email else '' }}</td>
+                    <td data-label="Year">{{ s.year_level }}</td>
+                    <td data-label="Section"><span class="table-tag">{{ s.section }}</span></td>
+                    <td data-label="Program">{{ s.program }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="no-label"><div class="table-empty"><strong>No students to display yet.</strong><span>Students in your assigned sections will appear here.</span></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="data-section">
+    <div class="data-section-heading">
+        <div>
+            <p class="section-overline">EXPORT</p>
+            <h2>Attendance report</h2>
+        </div>
+    </div>
+    <form class="mform" method="get" action="{{ url_for('professor_export_csv') }}">
+        <div class="fsec">
+            <div class="fsec-head"><h2>Choose what to export</h2><p>Only students from your assigned sections are included. The file downloads as an Excel spreadsheet.</p></div>
+            <div class="fields">
+                <label>Event
+                    <select name="event_id">
+                        <option value="">All events</option>
+                        {% for e in events %}
+                        <option value="{{ e.id }}">{{ e.title }} ({{ ui.d(e.event_date) }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Section
+                    <select name="section">
+                        <option value="">All my sections</option>
+                        {% for s in sections %}
+                        <option value="{{ s }}">{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Attendance
+                    <select name="status">
+                        <option value="all">Everyone registered</option>
+                        <option value="absent">Absent only (no time-in)</option>
+                        <option value="present">Present only (timed in)</option>
+                        <option value="onsite">Still on site (no time-out yet)</option>
+                        <option value="completed">Completed (time-in and time-out)</option>
+                    </select>
+                </label>
+                <label>Sort by
+                    <select name="sort">
+                        <option value="name_asc">Name, A to Z</option>
+                        <option value="name_desc">Name, Z to A</option>
+                        <option value="section">Section, then name</option>
+                        <option value="time_in">Earliest time-in</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">{{ ui.ico('download') }} Download Excel</button>
+    </form>
+</section>
+
+{% if past_events is defined %}
+<section class="data-section">
+    <div class="data-section-heading">
+        <div>
+            <p class="section-overline">PAST EVENTS</p>
+            <h2>Archived Event Attendance</h2>
+        </div>
+    </div>
+    <div class="tablebox">
+        <table class="t-stack">
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Attendance View</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in past_events %}
+                <tr>
+                    <td data-label="Event"><strong>{{ e.title }}</strong></td>
+                    <td data-label="Date" class="date-cell">{{ ui.d(e.event_date) }}</td>
+                    <td data-label="Attendance"><a href="{{ url_for('attendance_dashboard', event_id=e.id) }}" class="btn btn-light btn-sm">View Attendance {{ ui.ico('arrow-ur') }}</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3" class="no-label"><div class="table-empty"><strong>No past events found for your sections.</strong></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

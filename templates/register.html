@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Register · LSPU{% endblock %}
+{% block content %}
+<div class="auth-shell">
+    <aside class="auth-aside on-dark" style="justify-content: center;">
+        <a class="back-link" href="{{ url_for('sign_in', role=role) }}" style="position: absolute; top: 48px; left: 52px;">{{ ui.ico('arrow-l') }} Back to login</a>
+        <div class="auth-story" style="margin-top: 0;">
+            <span class="auth-seal"><img src="{{ url_for('static', filename='lspu-logo.png') }}" alt=""></span>
+            <p class="eyebrow" style="margin-top:28px"><span class="eyebrow-line"></span> {{ role.upper() }} REGISTRATION</p>
+            <h1>Join the<br>campus<span>.</span></h1>
+            <p class="auth-story-copy">Create your student account to register for events and keep your receipts.</p>
+        </div>
+        <div class="auth-side-note" style="position: absolute; bottom: 48px; left: 52px;">
+            <span class="auth-side-mark">{{ ui.ico('lock') }}</span><span>Passwords need at least<br>12 characters.</span>
+        </div>
+    </aside>
+    <section class="auth-panel">
+        <div class="auth-panel-heading"><span class="panel-overline">{{ role.upper() }} REGISTRATION</span><h2>Create an account</h2><p>Fill in your details to get started.</p></div>
+        <form method="post" class="form-stack" data-lock>
+            {{ ui.csrf() }}
+            <label>Full Name<input name="name" required autocomplete="name"></label>
+            <label>Email<input name="email" type="email" required autocomplete="email"></label>
+            
+            <label>Password (12+ chars)<input name="password" type="password" minlength="12" required autocomplete="new-password"></label>
+            <label>Confirm Password<input name="confirm_password" type="password" minlength="12" required autocomplete="new-password"></label>
+
+            {% if role == 'student' %}
+                <label>Student Number
+                    <input name="student_number" required placeholder="0000-0000" pattern="\d{4}-\d{4}" title="Format: 0000-0000">
+                </label>
+                <label>Section
+                    <select name="section" required>
+                        <option value="" disabled selected>Select Section</option>
+                        <optgroup label="BSCS">
+                            <option value="BSCS 1A">BSCS 1A</option>
+                            <option value="BSCS 1B">BSCS 1B</option>
+                            <option value="BSCS 2A">BSCS 2A</option>
+                            <option value="BSCS 2B">BSCS 2B</option>
+                            <option value="BSCS 3A">BSCS 3A</option>
+                            <option value="BSCS 3B">BSCS 3B</option>
+                            <option value="BSCS 4A">BSCS 4A</option>
+                            <option value="BSCS 4B">BSCS 4B</option>
+                        </optgroup>
+                        <optgroup label="BSIT">
+                            <option value="BSIT 1A">BSIT 1A</option>
+                            <option value="BSIT 1B">BSIT 1B</option>
+                            <option value="BSIT 2A">BSIT 2A</option>
+                            <option value="BSIT 2B">BSIT 2B</option>
+                            <option value="BSIT 3A">BSIT 3A</option>
+                            <option value="BSIT 3B">BSIT 3B</option>
+                            <option value="BSIT 3C">BSIT 3C</option>
+                            <option value="BSIT 3D">BSIT 3D</option>
+                            <option value="BSIT 4A">BSIT 4A</option>
+                            <option value="BSIT 4B">BSIT 4B</option>
+                            <option value="BSIT 4C">BSIT 4C</option>
+                            <option value="BSIT 4D">BSIT 4D</option>
+                        </optgroup>
+                    </select>
+                </label>
+                <label>Year Level<select name="year_level"><option>First Year</option><option>Second Year</option><option>Third Year</option><option>Fourth Year</option></select></label>
+                <label>Program<select name="program"><option>BSCS</option><option>BSIT</option></select></label>
+            {% else %}
+                <label>Handled Sections<input name="handled_sections" placeholder="1A, 2B"></label>
+            {% endif %}
+            
+            <button class="btn btn-primary btn-block" type="submit" data-busy="Creating account">Register Account {{ ui.ico('arrow-r') }}</button>
+        </form>
+        <div class="auth-links"><p>Already have an account? <a href="{{ url_for('sign_in', role=role) }}">Log in</a></p></div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}Account management · LSPU{% endblock %}
+{% block content %}
+<section class="page-heading compact-heading"><div><p class="eyebrow"><span class="eyebrow-line"></span> ADMIN WORKSPACE</p><h1>Account directory<span>.</span></h1><p class="heading-description">Read-only view of existing student and professor accounts.</p></div></section>
+<section class="section" style="margin-top:36px">
+  <div class="box-heading"><p class="section-overline">DIRECTORY</p><h2>Existing accounts</h2><p>Account records currently available in the system.</p></div>
+  <div class="tablebox">
+      <table class="t-stack">
+          <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Section</th></tr></thead>
+          <tbody>
+              {% for u in users %}
+              <tr>
+                  <td data-label="Name"><strong>{{ u.name }}</strong></td>
+                  <td data-label="Role"><span class="table-tag">{{ u.role }}</span></td>
+                  <td data-label="Email">{{ u.email[:3] }}****{{ u.email.split('@')[1] if '@' in u.email else '' }}</td>
+                  <td data-label="Section">{{ u.section or u.handled_sections or '—' }}</td>
+              </tr>
+              {% else %}
+              <tr><td colspan="4" class="no-label"><div class="table-empty"><strong>No accounts found.</strong></div></td></tr>
+              {% endfor %}
+          </tbody>
+      </table>
+  </div>
+</section>
+{% endblock %}

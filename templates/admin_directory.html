@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui with context %}
+{% block title %}User Directory · LSPU{% endblock %}
+{% block content %}
+<section class="page-heading compact-heading">
+    <div>
+        <p class="eyebrow"><span class="eyebrow-line"></span> ADMIN WORKSPACE</p>
+        <h1>User directory<span>.</span></h1>
+        <p class="heading-description">A read-only overview of all registered students and faculty members.</p>
+    </div>
+    <a class="btn btn-light" href="{{ url_for('admin_home') }}">{{ ui.ico('arrow-l') }} Back to dashboard</a>
+</section>
+
+<section class="roster-summary">
+    <div><span class="summary-label">FACULTY</span><strong>{{ professors|length }}</strong><p>Registered professors</p></div>
+    <div><span class="summary-label">STUDENTS</span><strong>{{ students|length }}</strong><p>Registered students</p></div>
+    <div><span class="summary-label">SECTIONS</span><strong>{{ students|map(attribute='section')|unique|list|length }}</strong><p>With at least one student</p></div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <div><p class="section-overline">01 / FACULTY</p><h2>Professors</h2></div>
+    </div>
+    <div class="tablebox">
+        <table class="t-stack">
+            <thead><tr><th>Name</th><th>Email</th><th>Handled Sections</th></tr></thead>
+            <tbody>
+                {% for p in professors %}
+                <tr>
+                    <td data-label="Name"><strong>{{ p.name }}</strong></td>
+                    <td data-label="Email">{{ p.email[:3] }}****{{ p.email.split('@')[1] if '@' in p.email else '' }}</td>
+                    <td data-label="Sections"><span class="table-tag">{{ p.handled_sections or 'None assigned' }}</span></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3" class="no-label"><div class="table-empty"><strong>No professors registered yet.</strong></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-head">
+        <div><p class="section-overline">02 / STUDENTS</p><h2>Students by section</h2></div>
+        {% if students %}<div class="search-row" style="width:min(380px,100%)"><div class="search-field">{{ ui.ico('search') }}<label class="sr-only" for="dir-filter">Filter students</label><input id="dir-filter" type="search" placeholder="Filter by name, number, or program" data-filter=".dir-table" data-count="dir-count"></div></div>{% endif %}
+    </div>
+    {% if students %}<p id="dir-count" class="section-sub" role="status" style="margin:-6px 0 14px"></p>{% endif %}
+
+    {% for section in students|groupby('section') %}
+    <details class="group-block" open>
+        <summary><span>Section {{ section.grouper or 'Unassigned' }}<span class="count">{{ section.list|length }} student{{ '' if section.list|length == 1 else 's' }}</span></span>{{ ui.ico('chev') }}</summary>
+        <div class="tablebox">
+            <table class="t-stack dir-table">
+                <thead><tr><th>Student Number</th><th>Name</th><th>Email</th><th>Year Level</th><th>Program</th></tr></thead>
+                <tbody>
+                    {% for s in section.list %}
+                    <tr>
+                        <td data-label="Student no." class="mono-cell">{{ s.student_number }}</td>
+                        <td data-label="Name"><strong>{{ s.name }}</strong></td>
+                        <td data-label="Email">{{ s.email[:3] }}****{{ s.email.split('@')[1] if '@' in s.email else '' }}</td>
+                        <td data-label="Year">{{ s.year_level }}</td>
+                        <td data-label="Program"><span class="table-tag">{{ s.program }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+    {% else %}
+    <div class="empty-state"><span class="empty-mark">{{ ui.ico('users') }}</span><h3>No students registered yet</h3><p>Students appear here, grouped by section, once they create an account.</p></div>
+    {% endfor %}
+</section>
+{% endblock %}
